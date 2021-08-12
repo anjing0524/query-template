@@ -9,7 +9,7 @@ import * as serviceWorker from "./serviceWorker";
 import { QueryClientProvider, QueryClient } from "react-query";
 
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import Basic from "./features/table/Basic";
+import Layout from "./features/table/router";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +26,7 @@ ReactDOM.render(
           </Route>
           <Route path="/query">
             <QueryClientProvider client={queryClient}>
-              <Basic />
+              <Layout /> 
             </QueryClientProvider>
           </Route>
         </Switch>
