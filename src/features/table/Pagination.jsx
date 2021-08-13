@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Tooltip, Dropdown, Menu, Input } from "antd";
 import {
   EllipsisOutlined,
@@ -6,30 +6,15 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import ProTable, { TableDropdown } from "@ant-design/pro-table";
-const valueEnum = {
-  0: "close",
-  1: "running",
-  2: "online",
-  3: "error",
-};
-const tableListDataSource = [];
-const creators = ["付小小", "曲丽丽", "林东东", "陈帅帅", "兼某某"];
-for (let i = 0; i < 5; i += 1) {
-  tableListDataSource.push({
-    key: i,
-    name: "AppName",
-    containers: Math.floor(Math.random() * 20),
-    creator: creators[Math.floor(Math.random() * creators.length)],
-    status: valueEnum[Math.floor(Math.random() * 10) % 4],
-    createdAt: Date.now() - Math.floor(Math.random() * 2000),
-    money: Math.floor(Math.random() * 2000) * i,
-    progress: Math.ceil(Math.random() * 100) + 1,
-    memo:
-      i % 2 === 1
-        ? "很长很长很长很长很长很长很长的文字要展示但是要留下尾巴"
-        : "简短备注文案",
-  });
-}
+import {
+  LightFilter,
+  ProFormDatePicker,
+  ProFormText,
+} from "@ant-design/pro-form";
+import usePageData, { createPrefetch } from "../../hooks/pagination";
+import { useQueryClient } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
+
 const columns = [
   {
     title: "排序",
@@ -38,9 +23,13 @@ const columns = [
     width: 48,
   },
   {
+    title: "初始序号",
+    dataIndex: "key",
+    width: 80,
+  },
+  {
     title: "应用名称",
     dataIndex: "name",
-    render: (_) => <a>{_}</a>,
     // 自定义筛选项功能具体实现请参考 https://ant.design/components/table-cn/#components-table-demo-custom-filter-panel
     filterDropdown: () => (
       <div style={{ padding: 8 }}>
@@ -104,9 +93,15 @@ const columns = [
     key: "option",
     valueType: "option",
     render: () => [
-      <Button key="link">链路</Button>,
-      <Button key="link2">报警</Button>,
-      <Button key="link3">监控</Button>,
+      <Button type="link" key="link">
+        链路
+      </Button>,
+      <Button type="link" key="link2">
+        报警
+      </Button>,
+      <Button type="link" key="link3">
+        监控
+      </Button>,
       <TableDropdown
         key="actionGroup"
         menus={[
@@ -126,44 +121,101 @@ const menu = (
 );
 
 export default function Pagination() {
+  const [page, setPage] = useState({ page: 1, size: 10 });
+  console.log(page);
+  const [params, setParams] = useState(null);
+  const [sorter, setSorter] = useState(null);
+  const [filters, setFilter] = useState(null);
+  const { data, isPreviousData, isLoading } = usePageData({
+    ...page,
+    params,
+    sorter,
+    filters,
+  });
+
+  const queryClent = useQueryClient();
+  useEffect(() => {
+    if (data?.hasMore) {
+      createPrefetch(
+        { ...page, page: page.page + 1, params, sorter, filters },
+        queryClent
+      );
+    }
+  }, [queryClent, data, page, params, sorter, filters]);
+
   return (
-    <ProTable
-      columns={columns}
-      request={(params, sorter, filter) => {
-        // 表单搜索项会从 params 传入，传递给后端接口。
-        console.log(params, sorter, filter);
-        return Promise.resolve({
-          data: tableListDataSource,
-          success: true,
-        });
-      }}
-      rowKey="key"
-      pagination={{
-        showQuickJumper: true,
-      }}
-      search={{
-        layout: "vertical",
-        defaultCollapsed: false,
-      }}
-      dateFormatter="string"
-      toolbar={{
-        title: "高级表格",
-        tooltip: "这是一个标题提示",
-      }}
-      toolBarRender={() => [
-        <Button key="danger" danger>
-          危险按钮
-        </Button>,
-        <Button key="show">查看日志</Button>,
-        <Button type="primary" key="primary">
-          创建应用
-        </Button>,
-        <Dropdown key="menu" overlay={menu}>
-          <Button>
-            <EllipsisOutlined />
-          </Button>
-        </Dropdown>,
-      ]}
-    />
+    <>
+      <ProTable
+        loading={isLoading}
+        onSubmit={(param) => {
+          // 表单提交
+          setParams(param);
+        }}
+        onChange={(_, filters, sorter) => {
+          setFilter(filters);
+          const { field, order } = sorter;
+          setSorter({ field, order });
+        }}
+        dataSource={data?.data || []}
+        columns={columns}
+        rowKey="key"
+        pagination={{
+          onShowSizeChange: (current, size) => {
+            if (!isPreviousData) {
+              setPage({ page: current, size });
+            }
+          },
+          showQuickJumper: true,
+          total: data?.total || 0,
+          pageSize: page.size,
+          current: page.page,
+        }}
+        search={{
+          // layout: "vertical",
+          defaultCollapsed: false,
+        }}
+        dateFormatter="string"
+        toolbar={{
+          title: "高级表格",
+          tooltip: "这是一个标题提示",
+          filter: (
+            <>
+              <LightFilter>
+                <ProFormDatePicker name="createAt" label="创建时间" />
+              </LightFilter>
+              <LightFilter>
+                <ProFormText name="name" label="应用名称" />
+              </LightFilter>
+            </>
+          ),
+          actions: [
+            <Button
+              key="primary"
+              type="primary"
+              onClick={() => {
+                alert("add");
+              }}
+            >
+              添加
+            </Button>,
+          ],
+        }}
+        toolBarRender={() => [
+          <Button key="danger" danger>
+            危险按钮
+          </Button>,
+          <Button key="show">查看日志</Button>,
+          <Button type="primary" key="primary">
+            创建应用
+          </Button>,
+          <Dropdown key="menu" overlay={menu}>
+            <Button>
+              <EllipsisOutlined />
+            </Button>
+          </Dropdown>,
+        ]}
+      />
+      <ReactQueryDevtools initialIsOpen></ReactQueryDevtools>
+    </>
   );
 }

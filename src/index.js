@@ -14,7 +14,7 @@ import Layout from "./features/table/router";
 const queryClient = new QueryClient();
 
 ReactDOM.render(
-  <React.StrictMode>
+  <React.Fragment>
     <Provider store={store}>
       <Router>
         <Switch>
@@ -26,13 +26,13 @@ ReactDOM.render(
           </Route>
           <Route path="/query">
             <QueryClientProvider client={queryClient}>
-              <Layout /> 
+              <Layout />
             </QueryClientProvider>
           </Route>
         </Switch>
       </Router>
     </Provider>
-  </React.StrictMode>,
+  </React.Fragment>,
   document.getElementById("root")
 );
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { HashRouter as Router, Link, Switch, Route } from "react-router-dom";
 import Basic from "./Basic";
+import Pagination from "./Pagination";
 
 export default function router() {
   return (
@@ -28,7 +29,7 @@ export default function router() {
             <Basic />
           </Route>
           <Route path="/page">
-            <Basic />
+            <Pagination />
           </Route>
         </Switch>
       </div>
