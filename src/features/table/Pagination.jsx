@@ -122,7 +122,6 @@ const menu = (
 
 export default function Pagination() {
   const [page, setPage] = useState({ page: 1, size: 10 });
-  console.log(page);
   const [params, setParams] = useState(null);
   const [sorter, setSorter] = useState(null);
   const [filters, setFilter] = useState(null);
@@ -146,6 +145,10 @@ export default function Pagination() {
   return (
     <>
       <ProTable
+        onColumnsStateChange={(map) => alert(JSON.stringify(map))}
+        options={{
+          reload: (e, action) => alert(e, action),
+        }}
         loading={isLoading}
         onSubmit={(param) => {
           // 表单提交
@@ -180,10 +183,10 @@ export default function Pagination() {
           tooltip: "这是一个标题提示",
           filter: (
             <>
-              <LightFilter>
+              <LightFilter onFinish={(v) => alert(JSON.stringify(v))}>
                 <ProFormDatePicker name="createAt" label="创建时间" />
               </LightFilter>
-              <LightFilter>
+              <LightFilter onFinish={(v) => alert(JSON.stringify(v))}>
                 <ProFormText name="name" label="应用名称" />
               </LightFilter>
             </>
