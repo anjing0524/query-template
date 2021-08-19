@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Tooltip, Dropdown, Menu, Input } from "antd";
 import {
   EllipsisOutlined,
@@ -19,7 +19,7 @@ const columns = [
   {
     title: "排序",
     dataIndex: "index",
-    valueType: "indexBorder",
+    valueType: "in  dexBorder",
     width: 48,
   },
   {
@@ -31,14 +31,18 @@ const columns = [
     title: "应用名称",
     dataIndex: "name",
     // 自定义筛选项功能具体实现请参考 https://ant.design/components/table-cn/#components-table-demo-custom-filter-panel
-    filterDropdown: () => (
-      <div style={{ padding: 8 }}>
-        <Input style={{ width: 188, marginBottom: 8, display: "block" }} />
-      </div>
-    ),
-    filterIcon: (filtered) => (
-      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-    ),
+    filterDropdown: function FilterDropDown() {
+      return (
+        <div style={{ padding: 8 }}>
+          <Input style={{ width: 188, marginBottom: 8, display: "block" }} />
+        </div>
+      );
+    },
+    filterIcon: function FilterIcon(filtered) {
+      return (
+        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      );
+    },
   },
   {
     title: "创建者",

@@ -25,10 +25,17 @@
   "scripts": {
     "start": "craco start",
     "build": "craco build",
-    "test": "craco test",
+    "test": "craco test --env=jsdom",
     "release": "release-it",
     "postinstall": "husky install",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "lint": "eslint 'src/**/*.{ts,tsx,js,jsx}'",
+    "lint_fix": "eslint 'src/**/*.{ts,tsx,js,jsx}' --fix"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown",
+    "*.js": "eslint --cache --fix",
+    "*.{js,css,md}": "prettier --write"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -46,7 +53,17 @@
     ]
   },
   "devDependencies": {
-    "husky": "^7.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.24.0",
+    "eslint-plugin-jest": "^24.4.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "eslint-plugin-react": "^7.24.0",
+    "husky": "^7.0.1",
+    "lint-staged": "^11.1.2",
+    "prettier": "2.3.2",
     "react-query-devtools": "^2.6.3",
     "release-it": "^14.11.5"
   },
