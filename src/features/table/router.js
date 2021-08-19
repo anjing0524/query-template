@@ -1,4 +1,3 @@
-import React from "react";
 import { HashRouter as Router, Link, Switch, Route } from "react-router-dom";
 import Basic from "./Basic";
 import Pagination from "./Pagination";
