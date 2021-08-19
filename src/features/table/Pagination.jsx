@@ -11,8 +11,12 @@ import {
   ProFormDatePicker,
   ProFormText,
 } from "@ant-design/pro-form";
-import usePageData, { createPrefetch } from "../../hooks/pagination";
-import { useQueryClient } from "react-query";
+import usePageData, {
+  createPrefetch,
+  addData,
+  QUER_PAGE_KEY,
+} from "../../hooks/pagination";
+import { useMutation, useQueryClient } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 
 const columns = [
@@ -136,15 +140,40 @@ export default function Pagination() {
     filters,
   });
 
-  const queryClent = useQueryClient();
+  const queryClient = useQueryClient();
+
+  // 新增
+  const addMutation = useMutation(addData, {
+    onMutate: async (data) => {
+      // 提交之前动作
+      await queryClient.cancelQueries(QUER_PAGE_KEY);
+
+      const previousValue = queryClient.getQueryData(QUER_PAGE_KEY);
+
+      queryClient.setQueryData(QUER_PAGE_KEY, (old) => ({
+        ...old,
+        data: [...old.data, data],
+      }));
+
+      return previousValue;
+    },
+    onError: (_err, _variables, previousValue) =>
+      queryClient.setQueryData(QUER_PAGE_KEY, previousValue),
+    onSettled: () => {
+      queryClient.invalidateQueries(QUER_PAGE_KEY);
+    },
+  });
+
+  console.log(addMutation.mutate);
+
   useEffect(() => {
     if (data?.hasMore) {
       createPrefetch(
         { ...page, page: page.page + 1, params, sorter, filters },
-        queryClent
+        queryClient
       );
     }
-  }, [queryClent, data, page, params, sorter, filters]);
+  }, [queryClient, data, page, params, sorter, filters]);
 
   return (
     <>

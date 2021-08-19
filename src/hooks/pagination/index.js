@@ -30,7 +30,30 @@ export const queryPageData = async ({
   }
 };
 
-const QUER_PAGE_KEY = "page";
+/**
+ * 增加一条数据
+ * @param {*} data
+ * @returns
+ */
+export const addData = async (data) => {
+  try {
+    const response = await fetch("/cats/add", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: new Headers({
+        "Content-Type": "application/json",
+      }),
+    });
+    if (response.ok) {
+      return response.json();
+    }
+  } catch (error) {
+    console.log("error", error);
+    return error;
+  }
+};
+
+export const QUER_PAGE_KEY = "page";
 // 导出自定义hooks
 export default function usePageData(param) {
   // TODO 后续再考虑排序和过滤 先处理表单查询
