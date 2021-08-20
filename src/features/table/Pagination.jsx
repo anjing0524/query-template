@@ -4,9 +4,11 @@ import {
   EllipsisOutlined,
   QuestionCircleOutlined,
   SearchOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import ProTable, { TableDropdown } from "@ant-design/pro-table";
 import {
+  ModalForm,
   LightFilter,
   ProFormDatePicker,
   ProFormText,
@@ -23,7 +25,7 @@ const columns = [
   {
     title: "排序",
     dataIndex: "index",
-    valueType: "in  dexBorder",
+    valueType: "indexBorder",
     width: 48,
   },
   {
@@ -149,11 +151,15 @@ export default function Pagination() {
       await queryClient.cancelQueries(QUER_PAGE_KEY);
 
       const previousValue = queryClient.getQueryData(QUER_PAGE_KEY);
-
-      queryClient.setQueryData(QUER_PAGE_KEY, (old) => ({
-        ...old,
-        data: [...old.data, data],
-      }));
+      if (previousValue) {
+        queryClient.setQueryData(QUER_PAGE_KEY, (old) => {
+          console.log(old);
+          return {
+            ...old,
+            data: [...old.data, data],
+          };
+        });
+      }
 
       return previousValue;
     },
@@ -162,9 +168,10 @@ export default function Pagination() {
     onSettled: () => {
       queryClient.invalidateQueries(QUER_PAGE_KEY);
     },
+    onSuccess: (data, _variables, _content) => {
+      console.log(data);
+    },
   });
-
-  console.log(addMutation.mutate);
 
   useEffect(() => {
     if (data?.hasMore) {
@@ -225,15 +232,27 @@ export default function Pagination() {
             </>
           ),
           actions: [
-            <Button
-              key="primary"
-              type="primary"
-              onClick={() => {
-                alert("add");
+            <ModalForm
+              layout="horizontal"
+              labelCol={{ span: 4 }}
+              wrapperCol={{ span: 14 }}
+              key="add-form"
+              title="新增数据"
+              onFinish={async (values) => {
+                alert(JSON.stringify(values));
+                addMutation.mutate(values);
+                return true;
               }}
+              trigger={
+                <Button type="primary">
+                  <PlusOutlined />
+                  添加
+                </Button>
+              }
             >
-              添加
-            </Button>,
+              <ProFormText width="md" name="name" label="应用名称" />
+              <ProFormDatePicker name="createAt" label="创建时间" />
+            </ModalForm>,
           ],
         }}
         toolBarRender={() => [
